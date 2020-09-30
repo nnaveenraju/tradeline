@@ -1,0 +1,5 @@
+[
+  "CreditorName",
+  "MinPaymentPercentage",
+  "Balance"
+]

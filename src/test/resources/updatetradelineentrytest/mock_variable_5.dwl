@@ -1,0 +1,1 @@
+"CreditorName = :CreditorName , MinPaymentPercentage = :MinPaymentPercentage , Balance = :Balance"

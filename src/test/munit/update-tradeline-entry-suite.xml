@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="update-tradeline-entry-suite.xml" />
+	<munit:test name="update-tradeline-entry-test" doc:id="03ee01c2-4fbd-4d4d-8d51-cbb0934db2eb" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock Update" doc:id="12eb8992-ce48-4d81-ab86-846ab59e2c6a" processor="db:update">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="17698c56-c98b-4a3d-a713-5d20fd30ec64" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[output application/java --- readUrl('classpath://updatetradelineentrytest/mock_payload.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					<munit-tools:attributes value="#[readUrl('classpath://updatetradelineentrytest/mock_attributes.dwl')]" />
+					<munit-tools:variables >
+						<munit-tools:variable key="outboundHeaders" value="#[readUrl('classpath://updatetradelineentrytest/mock_variable_.dwl')]" />
+						<munit-tools:variable key="values" value="#[output application/java --- readUrl('classpath://updatetradelineentrytest/mock_variable_1.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="tradelineId" value="#[output application/java --- readUrl('classpath://updatetradelineentrytest/mock_variable_2.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="columns" value="#[output application/java --- readUrl('classpath://updatetradelineentrytest/mock_variable_3.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="updated" value="#[output application/java --- readUrl('classpath://updatetradelineentrytest/mock_variable_4.dwl')]" mediaType="application/java" encoding="UTF-8" />
+						<munit-tools:variable key="updates" value="#[output application/java --- readUrl('classpath://updatetradelineentrytest/mock_variable_5.dwl')]" mediaType="application/java" encoding="UTF-8" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:spy doc:name="Spy Transform Message" doc:id="89db4782-461e-43a2-9f81-cce4c79eaa83" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="cf30e5df-846c-48de-a123-3c6fedfc176c" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="9429bbec-8325-4e45-afdb-c8cd4a270c1f" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import updatetradelineentrytest::spy_assert_payload
+---
+spy_assert_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="11a7b906-c8d8-4daf-a4ad-d6ee669c43e5" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import updatetradelineentrytest::spy_assert_payload1
+---
+spy_assert_payload1::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit-tools:spy doc:name="Spy Transform Message" doc:id="28092cb1-8e5e-4891-adb7-76d46ec0eb79" processor="ee:transform">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="7e69b141-8bd0-4c44-97ce-8b85bbbec9b4" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+				<munit-tools:before-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="d5bccc74-c739-4074-846d-b17be3ab13c0" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import updatetradelineentrytest::spy_assert_payload2
+---
+spy_assert_payload2::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:before-call>
+				<munit-tools:after-call >
+					<munit-tools:assert doc:name="Assert payload" doc:id="f0e75593-539a-43cf-8ea5-7f8de6978ea5" message="The payload does not match">
+						<munit-tools:that ><![CDATA[#[%dw 2.0
+import updatetradelineentrytest::spy_assert_payload3
+---
+spy_assert_payload3::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+					</munit-tools:assert>
+				</munit-tools:after-call>
+			</munit-tools:spy>
+			<munit:set-event doc:name="Set Input" doc:id="c4681b5a-38a6-434f-a7e1-7ca47b263104" >
+				<munit:payload value="#[output application/json --- readUrl('classpath://updatetradelineentrytest/set-event_payload.dwl')]" encoding="UTF-8" mediaType="application/json" />
+				<munit:attributes value="#[readUrl('classpath://updatetradelineentrytest/set-event_attributes.dwl')]" />
+				<munit:variables >
+					<munit:variable key="outboundHeaders" value="#[readUrl('classpath://updatetradelineentrytest/set-event_variable_.dwl')]" />
+					<munit:variable key="tradelineId" value="#[output application/java --- readUrl('classpath://updatetradelineentrytest/set-event_variable_1.dwl')]" encoding="UTF-8" mediaType="application/java" />
+				</munit:variables>
+			</munit:set-event>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="Flow-ref to update-tradeline-entry" doc:id="0d774fe7-3088-48ba-b379-fc57176619ba" name="update-tradeline-entry"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert doc:name="Assert payload" doc:id="e00ffcb6-3413-48f3-8526-f40aad263799" message="The payload does not match">
+				<munit-tools:that ><![CDATA[#[%dw 2.0
+import updatetradelineentrytest::assert_expression_payload
+---
+assert_expression_payload::main({payload: payload, attributes: attributes, vars: vars})]]]></munit-tools:that>
+			</munit-tools:assert>
+			<munit-tools:verify-call doc:name="Verify Transform Message" doc:id="26dcd23b-406b-4b6a-a82a-2e46422a0d33" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="cf30e5df-846c-48de-a123-3c6fedfc176c" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Transform Message" doc:id="e420a463-4b96-4bce-a556-937944bc34c2" processor="ee:transform" times="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="7e69b141-8bd0-4c44-97ce-8b85bbbec9b4" attributeName="doc:id" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+</mule>

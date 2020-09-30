@@ -1,0 +1,18 @@
+#%RAML 1.0 Trait
+
+uses:
+  errorMessage: ../library/errorMessages.raml
+
+responses:
+  400:
+    body:
+      application/json:
+        type: errorMessage.errorMessage
+  401:
+    body:
+      application/json:
+        type: errorMessage.unauthorizedMessage
+  500:
+    body:
+      application/json:
+        type: errorMessage.internalErrorMessage

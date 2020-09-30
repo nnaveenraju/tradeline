@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:spring="http://www.mulesoft.org/schema/mule/spring" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/spring http://www.mulesoft.org/schema/mule/spring/current/mule-spring.xsd
+http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	
+	<spring:config name="Spring_Config" doc:name="Spring Config" doc:id="9cc0abda-2aec-4dd7-b13c-b7844268aaf3" files="beans.xml" />
+	
+	<spring:security-manager doc:name="Spring Security manager" doc:id="d2d0ea6b-1998-45f8-85e0-895631824219" >
+		<spring:delegate-security-provider name="memory-provider" delegate-ref="authenticationManager" />
+	</spring:security-manager>
+	
+	<http:listener-config name="tradeline-httpListenerConfig">
+        <http:listener-connection host="0.0.0.0" port="${secure::http.port}" />
+    </http:listener-config>
+    
+    
+	
+    <!-- <db:config name="backup-connection" doc:name="Database Config" doc:id="052ed407-37c5-4080-99d2-3d1b8c1f75b0" >
+		<db:generic-connection url="${secure::h2.db.url}" driverClassName="org.h2.Driver" />
+	</db:config> -->
+
+	<db:config name="active-db" doc:name="Database Config" doc:id="10e6337d-0ae3-4a42-b214-1cb183509451"  >
+		<db:generic-connection url="jdbc:mysql://${secure::mysql.host}:${secure::mysql.port}/${secure::mysql.database}?createDatabaseIfNotExist=true&amp;serverTimezone=UTC&amp;allowPublicKeyRetrieval=true&amp;useSSL=false"
+					driverClassName="com.mysql.jdbc.Driver" password="${secure::mysql.password}" user="${secure::mysql.user}" />
+	</db:config>
+	
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="4c5df3da-0a4c-46f3-9c13-984e8f3f7870" >
+		<http:request-connection protocol="HTTPS" host="${secure::restapi.host}" port="443" />
+	</http:request-config>
+	<json:config name="JSON_Config" doc:name="JSON Config" doc:id="26f2cc23-40b1-4d5f-8db2-e8a66d8d7d48" />
+	<json-logger:config name="JSON_Logger_Config" doc:name="JSON Logger Config" doc:id="ff1f780c-6958-4beb-931b-794f074c2486" 
+			environment="${secure::env}" disabledFields="content" applicationName="${secure::json.logger.application.name}" applicationVersion="${secure::json.logger.application.version}"/>
+			
+	<!-- <configuration-properties doc:name="Configuration properties" doc:id="e35baf0d-b9ec-4d2e-9bca-cc803a9e68a8" 
+				file="properties/tradeline-dev.properties" /> -->
+    
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="6d89e674-d16d-4705-ac3e-fef7cfc84c48" 
+			file="properties/tradeline-dev.properties" key="${key}" >
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<global-property doc:name="Global Property" doc:id="46f9d353-351d-4d98-b79f-ee76020a269f" name="key" value="Tradeline123" />
+	<global-property doc:name="Global Property" doc:id="1c90f3ae-224c-40e9-821f-c4f726f3facd" name="env" value="dev" />
+	
+</mule>
+

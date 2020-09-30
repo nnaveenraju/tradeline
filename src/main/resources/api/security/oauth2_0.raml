@@ -1,0 +1,35 @@
+#%RAML 1.0 SecurityScheme
+type: OAuth 2.0
+
+uses:
+  errorMessage: ../library/errorMessages.raml
+
+
+describedBy:
+  headers:
+    Authorization: 
+      type: string
+  queryParameters:
+    access_token:
+      type: string
+  responses:
+    401:
+      description: | 
+          Bad or expired token. This can happen if the user or Dropbox
+          revoked or expired an access token. To fix, re-authenticate
+          the user.
+      body:
+        application/json:
+          type: errorMessage.unauthorizedMessage
+          
+settings:
+  accessTokenUri: https://api.dropbox.com/1/oauth2/token
+  authorizationUri: https://www.dropbox.com/1/oauth2/authorize
+  authorizationGrants:
+    - authorization_code
+    - password
+    - client_credentials
+    - implicit
+  scopes:
+    - READ
+    - WRITE

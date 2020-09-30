@@ -1,0 +1,202 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:spring="http://www.mulesoft.org/schema/mule/spring" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd  http://www.mulesoft.org/schema/mule/spring http://www.mulesoft.org/schema/mule/spring/current/mule-spring.xsd http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+    
+    <apikit:config name="tradeline-config" api="tradeline.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+    
+    <flow name="tradeline-main">
+        <http:listener config-ref="tradeline-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="tradeline-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:BAD_REQUEST">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Bad request"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">400</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:METHOD_NOT_ALLOWED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Method not allowed"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">405</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_ACCEPTABLE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not acceptable"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">406</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:UNSUPPORTED_MEDIA_TYPE">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Unsupported media type"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">415</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+            <on-error-propagate type="APIKIT:NOT_IMPLEMENTED">
+                <ee:transform xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Not Implemented"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">501</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <!-- <flow name="tradeline-console">
+        <http:listener config-ref="tradeline-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="tradeline-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+-&#45;&#45;
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow> -->
+    <flow name="tradeline-console">
+        <http:listener config-ref="tradeline-httpListenerConfig" path="/console/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:console config-ref="tradeline-config" />
+        <error-handler>
+            <on-error-propagate type="APIKIT:NOT_FOUND">
+                <ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+                    <ee:message>
+                        <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{message: "Resource not found"}]]></ee:set-payload>
+                    </ee:message>
+                    <ee:variables>
+                        <ee:set-variable variableName="httpStatus">404</ee:set-variable>
+                    </ee:variables>
+                </ee:transform>
+            </on-error-propagate>
+        </error-handler>
+    </flow>
+    <flow name="get:\tradelines:tradeline-config">
+        <!-- <spring:authorization-filter doc:name="Authorization filter" doc:id="611b7c6d-690c-4e2e-8576-e3666b9f27ec" requiredAuthorities="ROLE_USER" /> -->
+        <try doc:name="Try" doc:id="5118b649-5039-487d-97c1-bb59ebc376db">
+            <http:basic-security-filter doc:name="Basic security filter" doc:id="d3197015-240f-4bb2-94ec-92fa8d2ffba9" realm="mule" />
+            <error-handler>
+                <on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="0c9cad9d-7c0d-42d8-9b5f-d30316974429" type="HTTP:BASIC_AUTHENTICATION">
+                    <json-logger:logger doc:name="Logger" doc:id="a2b05867-5653-4b96-85ef-b075761f87d3" config-ref="JSON_Logger_Config" message="Failed in creating Tradeline... #[error.description]" priority="ERROR" />
+                    <set-variable value="401" doc:name="Set Variable" doc:id="3f4f078d-bbc9-43f3-bddf-a33071e24edf" variableName="httpStatus" />
+                    <flow-ref doc:name="common-error-handler" doc:id="9f6008fe-86fd-4709-9896-7620b9e1dea8" name="common-error-handler" />
+                </on-error-propagate>
+            </error-handler>
+        </try>
+        <logger level="INFO" message="get:\tradelines:tradeline-config" />
+        <json-logger:logger doc:name="Logger" doc:id="3ddc0239-5ff0-4e8e-b6f9-4058a9868e38" config-ref="JSON_Logger_Config" message="get:\tradelines:tradeline-config" />
+        <flow-ref doc:name="get-tradeline-data" doc:id="4a4f30e9-08ad-4a1a-8648-7cecf2c862a1" name="get-tradeline-data" />
+    </flow>
+    <flow name="post:\tradelines:application\json:tradeline-config">
+        <json-logger:logger doc:name="Logger" doc:id="fff45b65-c939-44b3-accc-094abfb51a00" config-ref="JSON_Logger_Config" message="post:\tradelines:application\json:tradeline-config" />
+        <flow-ref doc:name="create-tradeline-entry" doc:id="edcf84f2-7fd4-4c52-bb98-8fac2799b9dc" name="create-tradeline-entry" />
+    </flow>
+    <flow name="put:\tradelines\(tradelineId):application\json:tradeline-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="tradelineId">attributes.uriParams.'tradelineId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <json-logger:logger doc:name="Logger" doc:id="901b94ec-487e-4c36-ae8f-68f0bde34ac8" config-ref="JSON_Logger_Config" message="put:\tradelines\(tradelineId):application\json:tradeline-config" />
+        <flow-ref doc:name="update-tradeline-entry" doc:id="840e3d15-36ab-4633-afd9-97413b6754ec" name="update-tradeline-entry" />
+    </flow>
+    <flow name="delete:\tradelines\(tradelineId):tradeline-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="tradelineId">attributes.uriParams.'tradelineId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <json-logger:logger doc:name="Logger" doc:id="888a20cb-683f-4555-9beb-61ba7f693eda" config-ref="JSON_Logger_Config" message="delete:\tradelines\(tradelineId):tradeline-config" />
+        <flow-ref doc:name="delete-tradeline-entry" doc:id="cbe2533a-4cda-4890-9784-468d13676eba" name="delete-tradeline-entry" />
+    </flow>
+    <flow name="patch:\tradelines\(tradelineId):application\json:tradeline-config">
+        <ee:transform>
+            <ee:variables>
+                <ee:set-variable variableName="tradelineId">attributes.uriParams.'tradelineId'</ee:set-variable>
+            </ee:variables>
+        </ee:transform>
+        <logger level="INFO" message="patch:\tradelines\(tradelineId):application\json:tradeline-config" />
+        <flow-ref doc:name="update-tradeline-entry" doc:id="8bf14dff-e10e-4ecc-8e4a-8f0fe3af714d" name="update-tradeline-entry" />
+    </flow>
+</mule>

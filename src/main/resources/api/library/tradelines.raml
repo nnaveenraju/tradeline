@@ -1,0 +1,49 @@
+#%RAML 1.0 Library
+usage: used for tradelines
+
+types:
+
+  tradelines:
+    description: lib for tradelines
+    type: array
+    items: tradeline
+    
+  tradeline:
+    type: object
+    description: lib for tradelines
+    properties:
+      id?:
+        type: number
+      creditorName:
+        type: string
+        required: true
+      firstName:
+        type: string
+        required: true
+      lastName:
+        type: string
+        required: true
+      minPaymentPercentage:
+        type: number
+        required: true
+        default: 2
+      balance:
+        type: number
+        required: true
+        default: 0
+  tradelinePatch:
+    type: object
+    description: lib for tradelines
+    properties:
+      creditorName?:
+        type: string
+      firstName?:
+        type: string
+      lastName?:
+        type: string
+      minPaymentPercentage?:
+        type: number
+        default: 2
+      balance?:
+        type: number
+        default: 0

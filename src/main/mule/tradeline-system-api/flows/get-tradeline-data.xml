@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+	<sub-flow name="get-tradeline-data" doc:id="c745f30a-d4ec-46b8-b9b2-6519236b0727" >
+		
+		<try doc:name="Try" doc:id="c152af00-c036-4246-9b51-eacb618c8512" >
+			<until-successful maxRetries="${secure::db.retry.count}" doc:name="Until Successful" doc:id="f341b8c3-6234-4ce5-8046-69e5ce5bce79" millisBetweenRetries="${secure::db.retry.frequency}">
+				<db:select doc:name="Select" doc:id="6d44f006-9fff-42cd-b30a-a5059d402f54" config-ref="active-db">
+					<db:sql ><![CDATA[select * from Tradeline;]]></db:sql>
+				</db:select>
+			</until-successful>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="234aa0d7-af5d-4010-a74c-b7b3181cb981" >
+					<json-logger:logger doc:name="Logger" doc:id="cc09fb8e-2f09-4dc4-bb03-ee6ac226e770" config-ref="JSON_Logger_Config" message="Failed in fetching Tradeline data... #[error.description]" priority="ERROR"/>
+					<set-variable value="500" doc:name="Set Variable" doc:id="ddaea243-2f7a-46ed-b696-001cc1274c16" variableName="httpStatus"/>
+					<flow-ref doc:name="common-error-handler" doc:id="21eec4d2-0a70-4fbb-9589-7f394bc19549" name="common-error-handler"/>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		
+		
+		
+		<ee:transform doc:name="Transform Message" doc:id="8ba6343f-fb67-42ce-b560-f65718064278" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload map (value, index) -> {
+	
+	Id: value.Id, 
+	CreditorName: value.CreditorName, 
+	FirstName: value.FirstName, 
+	LastName: value.LastName, 
+	MinPaymentPercentage: value.MinPaymentPercentage, 
+	Balance: value.Balance
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+</mule>

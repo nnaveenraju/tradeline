@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule
+	xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+
+	<sub-flow name="update-tradeline-entry"
+		doc:id="ed8996fc-7d19-4c54-a697-5d7d276c49b2">
+		<ee:transform doc:name="Transform Message" doc:id="7e69b141-8bd0-4c44-97ce-8b85bbbec9b4">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+---
+{
+	
+	(CreditorName: payload.creditorName) if payload.creditorName?, 
+	(FirstName: payload.firstName) if payload.firstName?, 
+	(LastName: payload.lastName) if payload.lastName?, 
+	(MinPaymentPercentage: payload.minPaymentPercentage) if payload.minPaymentPercentage?, 
+	(Balance: payload.balance) if payload.balance?
+	
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="b594e767-b9dd-48bd-809a-67ab8c434f26">
+			<ee:variables>
+				<ee:set-variable variableName="columns"><![CDATA[%dw 2.0
+output application/java
+
+---
+payload pluck $$
+]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		 <ee:transform doc:name="Transform Message" doc:id="0dfae972-1f9e-4151-92a3-c624800fbcfe">
+			<ee:variables>
+				<ee:set-variable variableName="updates"><![CDATA[%dw 2.0
+output application/java
+
+---
+(vars.columns map (v, i) -> {
+	
+	"Query": ((v) ++ " = :" ++ v) as String
+	
+}).Query joinBy " , "]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Transform Message" doc:id="8299ba6f-da03-474f-be08-33b7871d08e5" >
+
+			<ee:variables >
+				<ee:set-variable variableName="values" ><![CDATA[%dw 2.0
+output application/java
+---
+{(vars.columns map (v, i) -> {
+	(v): payload[v]
+})} ++ {
+	Id: vars.tradelineId as Number
+}]]></ee:set-variable>
+			</ee:variables> 
+
+		</ee:transform>
+		
+		<logger level="INFO" doc:name="Logger" doc:id="d2aa1900-567e-4fb1-9f04-63d85b8529c3" />
+		<try doc:name="Try" doc:id="8ebf52d4-b48f-437f-9522-ea65e6231ac7" >
+			<until-successful maxRetries="${secure::db.retry.count}" doc:name="Until Successful" doc:id="81b96452-b85f-403e-a80e-1f20acb64505" millisBetweenRetries="${secure::db.retry.frequency}">
+				<db:update doc:name="Update" doc:id="17698c56-c98b-4a3d-a713-5d20fd30ec64" config-ref="active-db" target="updated">
+					<db:sql ><![CDATA[#["update Tradeline set $(vars.updates) where Id= :Id;"]
+]]></db:sql>
+					<db:input-parameters ><![CDATA[#[vars.values]]]></db:input-parameters>
+				</db:update>
+			</until-successful>
+			<error-handler >
+				<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="1fa24db8-4470-4587-8856-acb3cbf7edcc" >
+					<json-logger:logger doc:name="Logger" doc:id="5b29554c-21b5-4288-9f70-b2471f951ab5" config-ref="JSON_Logger_Config" message="Failed in creating Tradeline... #[error.description]" priority="ERROR"/>
+					<set-variable value="500" doc:name="Set Variable" doc:id="764d0484-5bba-4f99-9656-e5d9c62e11e3" variableName="httpStatus"/>
+					<flow-ref doc:name="common-error-handler" doc:id="b86ab13e-872d-4299-a99d-fe348ed974df" name="common-error-handler"/>
+				</on-error-propagate>
+			</error-handler>
+		</try>
+		<ee:transform doc:name="Transform Message" doc:id="cf30e5df-846c-48de-a123-3c6fedfc176c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload ++ {
+	Id: vars.tradelineId as Number
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+
+	</sub-flow>
+</mule>

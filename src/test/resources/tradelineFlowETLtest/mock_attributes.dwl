@@ -1,0 +1,30 @@
+{
+  "headers": {
+    "connection": "keep-alive",
+    "content-length": "1638",
+    "cache-control": "max-age=300",
+    "content-security-policy": "default-src 'none'; style-src 'unsafe-inline'; sandbox",
+    "content-type": "text/plain; charset=utf-8",
+    "etag": "\"d24334d5cb89a73f6634140cb047ceff819dca82cb1730862dcb50a5134b33ca\"",
+    "strict-transport-security": "max-age=31536000",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "deny",
+    "x-xss-protection": "1; mode=block",
+    "via": "1.1 varnish (Varnish/6.0)",
+    "via": "1.1 varnish",
+    "x-github-request-id": "8636:6D69:DF6A5:10BE06:5F714DB3",
+    "accept-ranges": "bytes",
+    "date": "Mon, 28 Sep 2020 02:54:53 GMT",
+    "x-served-by": "cache-dfw18659-DFW",
+    "x-cache": "MISS, HIT",
+    "x-cache-hits": "0, 1",
+    "x-timer": "S1601261694.537257,VS0,VE113",
+    "vary": "Authorization,Accept-Encoding",
+    "access-control-allow-origin": "*",
+    "x-fastly-request-id": "4f5f73d451e559dfd70486e90f2aca3fff9677ef",
+    "expires": "Mon, 28 Sep 2020 02:59:53 GMT",
+    "source-age": "0"
+  },
+  "reasonPhrase": "OK",
+  "statusCode": 200
+}

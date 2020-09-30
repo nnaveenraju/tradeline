@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd 
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd 
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+
+	<flow name="tradelineFlow" doc:id="71fdd5b4-6bc9-4c1f-8465-7a03ed4406ce">
+		<scheduler doc:name="Scheduler" doc:id="32f270bb-40ca-4d78-8269-fa071085523d">
+			<scheduling-strategy>
+				<fixed-frequency frequency="100" timeUnit="MINUTES" />
+			</scheduling-strategy>
+		</scheduler>
+		<json-logger:logger doc:name="Logger" doc:id="4650b229-b28a-4cfe-b2fa-9860cce8e279" config-ref="JSON_Logger_Config" message="Starting to build database for Tradeline" />
+		<flow-ref doc:name="create-database" doc:id="0b790a16-a33b-494e-b929-14444078e5cd" name="create-database" />
+		<flow-ref doc:name="fetch-data-from-service" doc:id="a82f3b19-8356-491d-9531-8ab97537cbf4" name="fetch-data-from-service" />
+		<flow-ref doc:name="store-data-in-db" doc:id="195d800c-cb6d-40f9-8022-b79410b83a8e" name="store-data-in-db" />
+		<flow-ref doc:name="fix-auto-increment-pk-database" doc:id="202c570a-392d-4bfa-a49f-bfcaca7effef" name="fix-auto-increment-pk-database" />
+		<choice doc:name="Choice" doc:id="d6b2ac76-e3e8-47a3-bb19-ee8e6a7b9eaa">
+			<when expression="#[p('secure::log.full.db.data.upon.startup')]">
+				<flow-ref doc:name="database-log-db-data" doc:id="beeeb5ee-48a1-436d-9669-7e7a25aa3e51" name="database-log-db-data" />
+			</when>
+			<otherwise>
+				<json-logger:logger doc:name="Logger" doc:id="ca4267d3-f429-4bd8-95e8-7e6e10219cda" config-ref="JSON_Logger_Config" message="Skipping DB logs" />
+			</otherwise>
+		</choice>
+		<json-logger:logger doc:name="Logger" doc:id="7eada799-92f7-4b36-afa9-2310ca762097" config-ref="JSON_Logger_Config" message="Completed to build database for Tradeline" tracePoint="END">
+			<json-logger:content><![CDATA[#[null]]]></json-logger:content>
+		</json-logger:logger>
+	</flow>
+	<sub-flow name="create-database" doc:id="93b277a2-2e5b-45d2-8574-db1d4c2871b8">
+		<db:execute-ddl doc:name="Execute DDL" doc:id="a615b20f-f61d-47d3-9fb5-289443d217e5" config-ref="active-db">
+			<db:sql><![CDATA[drop TABLE if exists Tradeline;]]></db:sql>
+		</db:execute-ddl>
+		<db:execute-ddl doc:id="d150ed69-9c68-4761-b533-1462940b2383" config-ref="active-db">
+			<db:sql><![CDATA[CREATE TABLE if not exists Tradeline (
+   Id BIGINT  NOT NULL ,
+   CreditorName VARCHAR(250),
+   FirstName VARCHAR(80),
+   LastName VARCHAR(80),
+   MinPaymentPercentage Decimal(20,2),
+   Balance Decimal(20,2)
+ );]]></db:sql>
+		</db:execute-ddl>
+	</sub-flow>
+	<sub-flow name="fetch-data-from-service" doc:id="c6a233f9-1c51-4add-a9fb-193226da1aa8">
+		<http:request method="GET" doc:name="Request" doc:id="fc74a1a3-f9be-4cbd-a395-80368de06814" config-ref="HTTP_Request_configuration" path="/StrategicFS/Recruitment/master/data.json" />
+		<ee:transform doc:name="Transform Message" doc:id="a1df5469-2737-40df-b422-13d4802041c6">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+
+var data = read(payload, 'application/json')
+---
+
+data map ((value, index) ->
+{
+	Id: value.id, 
+	CreditorName: value.creditorName, 
+	FirstName: value.firstName, 
+	LastName: value.lastName, 
+	MinPaymentPercentage: value.minPaymentPercentage, 
+	Balance: value.balance
+	
+})]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</sub-flow>
+	<sub-flow name="store-data-in-db" doc:id="d63628ee-0cc5-4d96-a55d-d36f461768b1">
+		<db:bulk-insert doc:name="Bulk insert" doc:id="9bf4e6f3-7a53-4ecb-8965-4e7d85d76095" config-ref="active-db">
+			<db:sql><![CDATA[insert into Tradeline (Id, CreditorName, FirstName, LastName, MinPaymentPercentage, Balance) 
+values (:Id, :CreditorName, :FirstName, :LastName, :MinPaymentPercentage, :Balance);
+]]></db:sql>
+		</db:bulk-insert>
+	</sub-flow>
+	<sub-flow name="fix-auto-increment-pk-database" doc:id="52be160d-4051-45a2-9fb5-9f7ca3774b2d" >
+		<db:execute-ddl doc:name="Execute DDL" doc:id="2851c9f9-4220-4976-a38e-26ed40484693" config-ref="active-db">
+			<db:sql><![CDATA[ALTER TABLE Tradeline MODIFY Id BIGINT PRIMARY KEY AUTO_INCREMENT;
+
+]]></db:sql>
+		</db:execute-ddl>
+	</sub-flow>
+	<sub-flow name="database-log-db-data" doc:id="05704543-cd33-4077-845a-df4b99514b47" >
+		<db:select doc:name="Select" doc:id="2f4e0281-b5ab-4054-b47b-95747fdb4070" config-ref="active-db">
+			<db:sql><![CDATA[select * from Tradeline;]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="d1c95dc6-157b-4b98-9985-b53baea5feae">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="7aa61db5-5817-46f0-99af-e30e09bb010b" message="#[payload]" />
+	</sub-flow>	
+	
+</mule>
+

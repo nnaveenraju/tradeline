@@ -1,0 +1,85 @@
+#%RAML 1.0
+title: Tradeline API
+
+baseUri: http://tradelines{env}.domain.com/{baseVersion}
+protocols:
+  - HTTP
+  - HTTPS
+
+baseUriParameters:
+  env:
+    enum:
+      - -dev
+      - -qa
+      - -uat
+
+  baseVersion:
+    type: string
+    description: Base version for this API
+    default: "1.0"
+    
+  #  !include security/securityScheme.raml
+
+securitySchemes:
+  oauth2_0: !include security/oauth2_0.raml
+  basicAuth: !include security/basic.raml
+
+uses:
+  tradelineLib: library/tradelines.raml
+
+traits:
+  client-id-enforcements: !include traits/client-id-enforcements.raml
+  errors: !include traits/common-errors.raml
+  
+/tradelines:
+  get:
+    description: Endpoint to get tradelines
+    securedBy:
+      - basicAuth
+    # is: [errors]
+    responses:
+      200:
+        body:
+          application/json:
+            type: tradelineLib.tradelines
+
+  post:
+    description: Create a new tradeline
+    # securedBy:
+    #   - oauth2_0
+    is: [client-id-enforcements, errors]
+    body:
+      application/json:
+        type: tradelineLib.tradeline
+    responses:
+      201:
+        body:
+          application/json:
+            type: tradelineLib.tradeline
+  /{tradelineId}:
+    patch:
+      description: update a specific tradeline
+      is: [client-id-enforcements]
+      body:
+        application/json:
+          type: tradelineLib.tradelinePatch
+      responses:
+        200:
+          body:
+            application/json:
+              type: tradelineLib.tradeline
+    put:
+      description: update a specific tradeline
+      is: [client-id-enforcements]
+      body:
+        application/json:
+          type: tradelineLib.tradeline
+      responses:
+        200:
+          body:
+            application/json:
+              type: tradelineLib.tradeline
+    delete:
+      description: Delete an tradeline
+      is: [client-id-enforcements, errors]
+    

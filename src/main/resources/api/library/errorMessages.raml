@@ -1,0 +1,33 @@
+#%RAML 1.0 Library
+usage: used for error messages
+
+types:
+  errorMessage:
+    type: object
+    description: Type for errorMessages
+    properties:
+      errorCode:
+        type: string
+      errorMessage:
+        type: string
+  
+  unauthorizedMessage:
+    type: object
+    description: Error message for trespassing
+    properties:
+      errorCode:
+        type: string
+        default: "401"
+      errorMessage:
+        type: string
+        default: "Not autorized to access this resource..."
+
+  internalErrorMessage:
+    type: object
+    properties:
+      errorCode:
+        type: string
+        default: "500"
+      errorMessage:
+        type: string
+        default: "Error processing the request internally. Please try again later..."
