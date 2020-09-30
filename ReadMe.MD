@@ -37,13 +37,25 @@ CREATE TABLE `Tradeline`.`TradeLines` (
 
 ### Import the RAML to a new Project
 
+## Maintain MySQL database for running the app locally.
+
+Open the /tradeline/src/main/resources/properties/tradeline-dev.properties file.
+Manipuldate the properties under the comment line: #MySQL DB
+
 
 ## Testing via browser using API KIT Console
 
-Navigate to the following:
+### Option 1:
+After you have the application running, navigate to the following and you can test the application:
 
  - http://localhost:8083/console/
  
+### Option 2:
+Use postman. I have embedded the postman collection the project test folder.
+ 
+ /tradeline/src/test/resources/Trade.postman_collection.json
+ 
+Import this collection and you should be seeing 5 HTTP requests to test the APIs. 
  
 ## Deploy application to Cloudhub
 

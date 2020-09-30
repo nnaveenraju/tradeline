@@ -1,0 +1,207 @@
+{
+	"info": {
+		"_postman_id": "95fd3262-2db1-4cda-8512-8768e0ddac9e",
+		"name": "Trade",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get-All-Tradeline",
+			"request": {
+				"auth": {
+					"type": "basic",
+					"basic": [
+						{
+							"key": "username",
+							"value": "tradeline",
+							"type": "string"
+						},
+						{
+							"key": "password",
+							"value": "password",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8083/api/tradelines",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"api",
+						"tradelines"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Create-Trade-line",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "client_id",
+						"value": "234234234234242222",
+						"type": "text"
+					},
+					{
+						"key": "client_secret",
+						"value": "234224242424234242423324",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"creditorName\": \"Sample3\",\n    \"firstName\": \"Suman-3\",\n    \"lastName\": \"Tester92\",\n    \"minPaymentPercentage\": 2.00,\n    \"balance\": 320.00\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8083/api/tradelines",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"api",
+						"tradelines"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Delete-Trade-line",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "client_id",
+						"value": "234234234234242222",
+						"type": "text"
+					},
+					{
+						"key": "client_secret",
+						"value": "234224242424234242423324",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"creditorName\": \"Sample3\",\n    \"firstName\": \"Suman-3\",\n    \"lastName\": \"Tester92\",\n    \"minPaymentPercentage\": 2.00,\n    \"balance\": 320.00\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8083/api/tradelines/4",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"api",
+						"tradelines",
+						"4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch-Trade-line",
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "client_id",
+						"value": "234234234234242222",
+						"type": "text"
+					},
+					{
+						"key": "client_secret",
+						"value": "234224242424234242423324",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"creditorName\": \"update - 2\",\n    \"minPaymentPercentage\": 12.01,\n    \"balance\": 300020.22\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8083/api/tradelines/1",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"api",
+						"tradelines",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Put-Trade-line",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "client_id",
+						"value": "234234234234242222",
+						"type": "text"
+					},
+					{
+						"key": "client_secret",
+						"value": "234224242424234242423324",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"creditorName\": \"Sample3\",\n    \"firstName\": \"Suman-3\",\n    \"lastName\": \"Tester92\",\n    \"minPaymentPercentage\": 2.00,\n    \"balance\": 320.00\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8083/api/tradelines",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8083",
+					"path": [
+						"api",
+						"tradelines"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"protocolProfileBehavior": {}
+}
