@@ -1,4 +1,4 @@
-#To run the project locally do the following:
+# To run the project locally do the following:
 
  - Clone the repo using command
  		git clone https://github.com/nnaveenraju/tradeline.git
