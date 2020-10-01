@@ -1,3 +1,16 @@
+#To run the project locally do the following:
+
+ - Clone the repo using command
+ 		git clone https://github.com/nnaveenraju/tradeline.git
+ 		or
+ 		Download the zip file from git repo.
+ 		
+ - Make sure you have MySQL installed locally or have access to one.
+ - Have an username and password to connect to the database.
+ - Maintain the MySQL credentials in the "/tradeline/src/main/resources/properties/tradeline-dev.properties" file under #MySQL DB
+ 
+
+
 # Walkthrough
 
 
